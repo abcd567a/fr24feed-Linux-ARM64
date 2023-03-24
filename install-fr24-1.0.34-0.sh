@@ -23,16 +23,19 @@ wget -O ${ASSETS_FOLDER}/init-functions "https://github.com/abcd567a/fr24feed-Li
 
 
 echo "copying files from assets folder to appropriate folders..."
+sudo killall fr24feed
+sudo systemctl stop fr24feed
 sudo cp ${ASSETS_FOLDER}/${FR24_BINARY} /usr/bin/fr24feed
 sudo cp ${ASSETS_FOLDER}/fr24feed-status /usr/bin/fr24feed-status
 sudo cp ${ASSETS_FOLDER}/fr24feed.ini /etc/fr24feed.ini
 sudo cp ${ASSETS_FOLDER}/fr24feed.service /etc/systemd/system/fr24feed.service
 
 INIT_FUNCTIONS_FOLDER=/lib/lsb
-if [[ ! ${INIT_FUNCTIONS_FOLDER} ]]; then 
-sudo mkdir -p ${INIT_FUNCTIONS_FOLDER}; 
+if [[ ! ${INIT_FUNCTIONS_FOLDER} ]]; then
+sudo mkdir -p ${INIT_FUNCTIONS_FOLDER};
 sudo cp ${ASSETS_FOLDER}/init-functions ${INIT_FUNCTIONS_FOLDER}/init-functions;
 fi
+
 
 echo -e "\e[32mCreation of necessary files of \"fr24feed\" completed...\e[39m"
 
@@ -61,6 +64,8 @@ elif [[ ! ${FR24_KEY} ]]; then
 sudo fr24feed --signup
 fi
 
+sudo systemctl daemon-reload
+
 ##CUSTOMIZE fr24feed.ini
 sed -i '/receiver/c\receiver=\"avr-tcp\"' /etc/fr24feed.ini
 sed -i '/host/c\host=\"127.0.0.1:30002\"' /etc/fr24feed.ini
@@ -70,6 +75,9 @@ sed -i '/raw/c\raw=\"no\"' /etc/fr24feed.ini
 sed -i '/bs/c\bs=\"no\"' /etc/fr24feed.ini
 sed -i '/mlat=/c\mlat=\"yes\"' /etc/fr24feed.ini
 sed -i '/mlat-without-gps=/c\mlat-without-gps=\"yes\"' /etc/fr24feed.ini
+
+sudo systemctl restart fr24feed
+
 echo " "
 echo " "
 echo -e "\e[01;32mInstallation of fr24feed completed...\e[39m"
